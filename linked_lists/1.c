@@ -5,12 +5,8 @@
  *
  * This code does linked lists and stuff with them.
  * I currently prefer (*node).next instead of node->next because I'm a moron.
- *
- * many files
- * check correctness
- * in erase after only erase 1 el after not all elms
- * exclude 0 from list
- *
+ * Update: I switched to ->.
+ * 
  *
  */
 
@@ -25,7 +21,7 @@ void rprint(struct node *head)
 	if (head == NULL)
 		printf("NULL\n");
 	else {
-                if ( /*(*head).n != 0 ||*/  head->next != NULL) {
+                if (head->next != NULL) {
 	        	printf("%d\n", (*head).n);
 		        rprint((*head).next);
                 }
@@ -48,16 +44,15 @@ void rinit(struct node *head)
                 (*head).n = a;
                 (*head).next = malloc(sizeof(struct node));
                 rinit((*head).next);
-
         }
 }
 
+/* deletes some accurances of value */
 void del_by_val(struct node *head, int val)
 {
         struct node *last = head;
         struct node *prev = last;
         if (head->n == val) {
-                puts("!!!");
                 *head = *(head->next);
         }
 
@@ -66,15 +61,13 @@ void del_by_val(struct node *head, int val)
                 if (last->next != NULL) {
                         if ((*last).n == val) {
                                 (*prev).next = (*last).next;
-                        
                                 }
                         }
                 prev = (*prev).next; 
         }
 }
 
-
-
+/* inserts new element from sdin after given value in list */
 void insert_after(struct node *head, int val)
 {
         struct node *last = head;
@@ -89,8 +82,6 @@ void insert_after(struct node *head, int val)
                 last = (*last).next; 
         }
 }
-
-
 
 /* init with natural numbers */
 void init(struct node *head, int len)
@@ -118,9 +109,7 @@ void print(struct node *head)
         printf("]\n\n\n\n");
 }
 
-
-
-/* inserts at given posetion from stdin */
+/* inserts at given posetion from stdin; now even supports first position */
 void insert_i(struct node *head, int i)
 {
         if (i < 1) {
@@ -153,12 +142,14 @@ void insert_i(struct node *head, int i)
                         puts("found your index!\ninsert new el after it:");
                         scanf("%d", &((*(*last).next).n));
                         (*(*last).next).next = tmp;
-                }
+                } else {
+                        puts("no such position in list\n");
                 last = (*last).next; 
+                } 
         }
 }
 
-/* erases fter given value */
+/* erases one element after given value */
 void erase_after(struct node *head, int val)
 {
         struct node *last = head;
@@ -173,39 +164,71 @@ void erase_after(struct node *head, int val)
         }
 }
 
+int len(struct node *head)
+{
+        struct node *last = head;
+        int len = 0;
+        while ((*last).next != NULL)  {
+                len++;
+                last = (*last).next; 
+        }
+        return len;
+}
+
+void free_list(struct node *head)
+{
+        struct node *last = head->next;
+        while (last != NULL)  {
+                struct node *tmp = last; 
+                last = (*last).next; 
+                free(tmp);
+
+        }
+}
+
+
+void delete_all_by_value(struct node *head, int val) 
+{
+        for (int i = 0; i < 3*len(head); i++)
+                del_by_val(head, val);
+}
 
 int main(void)
 {
 
         struct node head;
         struct node *phead = &head;
-        puts("inputting list until you input 0 as element:");
+        puts("Inputting list of ints; do 0 to stop;");
         rinit(phead);
 
         print(phead);
         rprint(phead);
 
-        puts("let's insert after value!\ninput value: ");
+        puts("Inserting elements after value!\nInput value: ");
         int v;
         scanf("%d", &v);
         insert_after(phead, v);
         print(phead);
 
-        puts("let's insert by position!\ninput index: ");
+        puts("Insert by position!\njnput index: ");
         int i;
         scanf("%d", &i);
         insert_i(phead, i);
         print(phead);
         
-        puts("let's eraise el in list after value!\ninput value: ");
+        puts("Removing elements from list after value!\nInput value: ");
         scanf("%d", &v);
         erase_after(phead, v);
         print(phead);
- 
-        puts("let's eraise element by value!\ninput value: ");
+
+        puts("Removing all elements of given value!\nInput value: ");
+
+
         scanf("%d", &v);
-        del_by_val(phead, v);
+        delete_all_by_value(phead, v);
         print(phead);
+
+        free_list(phead);
 
         return 0;
 }
