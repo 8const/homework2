@@ -6,6 +6,12 @@
  * This code does linked lists and stuff with them.
  * I currently prefer (*node).next instead of node->next because I'm a moron.
  *
+ * many files
+ * check correctness
+ * in erase after only erase 1 el after not all elms
+ * exclude 0 from list
+ *
+ *
  */
 
 struct node {
@@ -19,9 +25,11 @@ void rprint(struct node *head)
 	if (head == NULL)
 		printf("NULL\n");
 	else {
-		printf("%d\n", (*head).n);
-		rprint((*head).next);
-	}
+                if ( /*(*head).n != 0 ||*/  head->next != NULL) {
+	        	printf("%d\n", (*head).n);
+		        rprint((*head).next);
+                }
+        }
 }
 
 /* recursive filling from stdin */
@@ -29,49 +37,44 @@ void rinit(struct node *head)
 {
         static int c = 0;
         int a;
-        printf("list[%d] = ",c );
+        printf("list[%d] = ", c);
         scanf("%d", &a);
-        c++;
-
-        (*head).n = a;
         if (a == 0) {
-                (*head).next = NULL;
+               (*head).next = NULL;
+               head = NULL;
+               return;
         } else {
+                c++;
+                (*head).n = a;
                 (*head).next = malloc(sizeof(struct node));
                 rinit((*head).next);
 
         }
-
-
 }
-/* init with natural numbers */
-void init(struct node *head, int len)
-{ 
-        struct node *last = head;
-        for (int i = 0; i < len-1; i++) {
-                (*last).n = i;
-                (*last).next = malloc(sizeof(struct node));
-                last = (*last).next;
-        }
-        
-        (*last).n = len-1; 
-        (*last).next = NULL; 
-}
-/* normal print of all elements in list */
-void print(struct node *head)
+
+void del_by_val(struct node *head, int val)
 {
         struct node *last = head;
-        printf("[");
-        while ((*last).next != NULL) {
-                printf("%d, ", (*last).n);
-                last = (*last).next; 
+        struct node *prev = last;
+        if (head->n == val) {
+                puts("!!!");
+                *head = *(head->next);
         }
 
-        printf("%d", (*last).n);
-        printf("]\n");
+        while ((*prev).next) {
+                last = (*prev).next;
+                if (last->next != NULL) {
+                        if ((*last).n == val) {
+                                (*prev).next = (*last).next;
+                        
+                                }
+                        }
+                prev = (*prev).next; 
+        }
 }
 
-/* inserts after given value */
+
+
 void insert_after(struct node *head, int val)
 {
         struct node *last = head;
@@ -87,10 +90,60 @@ void insert_after(struct node *head, int val)
         }
 }
 
+
+
+/* init with natural numbers */
+void init(struct node *head, int len)
+{ 
+        struct node *last = head;
+        for (int i = 0; i < len-1; i++) {
+                (*last).n = i;
+                (*last).next = malloc(sizeof(struct node));
+                last = (*last).next;
+        }
+        
+        (*last).n = len-1; 
+        (*last).next = NULL; 
+}
+
+/* normal print of all elements in list */
+void print(struct node *head)
+{
+        struct node *last = head;
+        printf("[ ");
+        while ((*last).next != NULL)  {
+                printf("%d ", (*last).n);
+                last = (*last).next; 
+        }
+        printf("]\n\n\n\n");
+}
+
+
+
 /* inserts at given posetion from stdin */
 void insert_i(struct node *head, int i)
 {
-        int j = 1 ;
+        if (i < 1) {
+                puts("sorry positions start with 1\n");
+                return;
+        }
+        
+        if (i == 1) {
+                struct node *newhead = malloc(sizeof(struct node));
+                struct node *tmp =  malloc(sizeof(struct node));
+                *tmp = *head;
+
+                puts("found your index!\ninsert new el in it:");
+                int v;
+                scanf("%d", &v);
+
+                newhead->n = v;
+                newhead->next = tmp;
+                *head = *newhead;
+                return;
+        }
+
+        int j = 1;
         struct node *last = head;
         while ((*last).next != NULL) {
                 j++;
@@ -108,45 +161,62 @@ void insert_i(struct node *head, int i)
 /* erases fter given value */
 void erase_after(struct node *head, int val)
 {
-        puts("enteres erase");
-        int j = 0;
-
         struct node *last = head;
         while ((*last).next != NULL) {
-                puts("in loop");
-                j++;
-                printf("%d", j);
                 if ((*last).n == val) {
-                        (*last).next = NULL;
-                        puts("NULLED after 5");
-                        break;
+                        if ((*(*last).next).next) {
+                                (*last).next = (*(*last).next).next;
+                                puts("found your val!\n:");
+                        }
                 }
                 last = (*last).next; 
-                puts("check");
         }
 }
-
-
-void del_by_val(struct node *head, int val)
-{
-        struct node *last = head;
-        struct node *prev = last;
-        while ((*prev).next != NULL) {
-                last = (*prev).next;
-                if ((*last).n == val) {
-                        (*prev).next = (*last).next;
-                }
-                prev = (*prev).next; 
-        }
-}
-
 
 
 int main(void)
 {
-        struct node head2;
-        init(&head2, 10);
-        del_by_val(&head2, 5);
-        print(&head2);
+
+        struct node head;
+        struct node *phead = &head;
+        puts("inputting list until you input 0 as element:");
+        rinit(phead);
+
+        print(phead);
+        rprint(phead);
+
+        puts("let's insert after value!\ninput value: ");
+        int v;
+        scanf("%d", &v);
+        insert_after(phead, v);
+        print(phead);
+
+        puts("let's insert by position!\ninput index: ");
+        int i;
+        scanf("%d", &i);
+        insert_i(phead, i);
+        print(phead);
+        
+        puts("let's eraise el in list after value!\ninput value: ");
+        scanf("%d", &v);
+        erase_after(phead, v);
+        print(phead);
+ 
+        puts("let's eraise element by value!\ninput value: ");
+        scanf("%d", &v);
+        del_by_val(phead, v);
+        print(phead);
+
         return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
