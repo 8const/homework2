@@ -53,14 +53,16 @@ void del_by_val(struct node *head, int val)
         struct node *last = head;
         struct node *prev = last;
         if (head->n == val) {
-                *head = *(head->next);
+                head = (head->next);
         }
 
         while ((*prev).next) {
                 last = (*prev).next;
                 if (last->next != NULL) {
                         if ((*last).n == val) {
+                                struct node *tmp = last;
                                 (*prev).next = (*last).next;
+                                free(tmp);
                                 }
                         }
                 prev = (*prev).next; 
@@ -129,6 +131,7 @@ void insert_i(struct node *head, int i)
                 newhead->n = v;
                 newhead->next = tmp;
                 *head = *newhead;
+                free(newhead);
                 return;
         }
 
@@ -143,8 +146,7 @@ void insert_i(struct node *head, int i)
                         scanf("%d", &((*(*last).next).n));
                         (*(*last).next).next = tmp;
                 } else {
-                        puts("no such position in list\n");
-                last = (*last).next; 
+                        last = (*last).next; 
                 } 
         }
 }
@@ -156,7 +158,9 @@ void erase_after(struct node *head, int val)
         while ((*last).next != NULL) {
                 if ((*last).n == val) {
                         if ((*(*last).next).next) {
+                                struct node *tmp = last->next;
                                 (*last).next = (*(*last).next).next;
+                                free(tmp);
                                 puts("found your val!\n:");
                         }
                 }
@@ -178,7 +182,7 @@ int len(struct node *head)
 void free_list(struct node *head)
 {
         struct node *last = head->next;
-        while (last != NULL)  {
+        while (last!= NULL)  {
                 struct node *tmp = last; 
                 last = (*last).next; 
                 free(tmp);
@@ -202,13 +206,13 @@ int main(void)
         rinit(phead);
 
         print(phead);
-        rprint(phead);
-
+       /* rprint(phead);*/
         puts("Inserting elements after value!\nInput value: ");
         int v;
         scanf("%d", &v);
         insert_after(phead, v);
         print(phead);
+
 
         puts("Insert by position!\njnput index: ");
         int i;
@@ -216,10 +220,12 @@ int main(void)
         insert_i(phead, i);
         print(phead);
         
+
         puts("Removing elements from list after value!\nInput value: ");
         scanf("%d", &v);
         erase_after(phead, v);
         print(phead);
+
 
         puts("Removing all elements of given value!\nInput value: ");
 
@@ -232,14 +238,5 @@ int main(void)
 
         return 0;
 }
-
-
-
-
-
-
-
-
-
 
 
